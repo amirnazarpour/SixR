@@ -1,297 +1,45 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head>
-  <meta charset="utf-8" />
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>Unity Web Player | SixR</title>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity Web Player | SixR</title>
+  </head>
+  <body style="text-align: center; padding: 0; border: 0; margin: 0;">
+    <canvas id="unity-canvas" width=600 height=960 tabindex="-1" style="width: 600px; height: 960px; background: #231F20"></canvas>
+    <script src="Build/Web.loader.js"></script>
+    <script>
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
 
-  <!-- Optional (keep if you have these files) -->
-  <link rel="shortcut icon" href="TemplateData/favicon.ico" />
+        var canvas = document.querySelector("#unity-canvas");
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        canvas.style.position = "fixed";
 
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+        document.body.style.textAlign = "left";
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
-      background: #231F20;
-    }
-
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    /* Background layer (optional) */
-    .background-layer {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      background: #2171b8;
-    }
-
-    /* Unity container */
-    #unity-container {
-      width: 600px;
-      height: 960px;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1;
-    }
-
-    #unity-canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      background: #231F20;
-    }
-
-    /* Loading overlay */
-    #unity-loading-bar {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: url('BG.png') no-repeat center center;
-      background-size: cover;
-      z-index: 1000;
-    }
-
-    #unity-loading-bar::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(30, 90, 158, 0.3);
-      z-index: -1;
-    }
-
-    #unity-logo {
-      width: 280px;
-      height: auto;
-      margin-bottom: 50px;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    #unity-logo img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    #unity-progress-bar-container {
-      width: 85%;
-      max-width: 400px;
-      text-align: center;
-    }
-
-    #unity-progress-text {
-      color: #fff;
-      font-size: 16px;
-      margin-bottom: 15px;
-      font-weight: bold;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-    }
-
-    #unity-progress-bar-wrapper {
-      position: relative;
-      width: 100%;
-      height: 32px;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-    }
-
-    #unity-progress-bar-empty {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, #e8e8e8 0%, #d0d0d0 50%, #c0c0c0 100%);
-      border-radius: 16px;
-    }
-
-    #unity-progress-bar-full {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 0%;
-      height: 100%;
-      transition: width 0.3s ease-out;
-      border-radius: 16px;
-      background: linear-gradient(180deg, #ffd700 0%, #f5c842 50%, #daa520 100%);
-      box-shadow:
-        inset 0 2px 4px rgba(255,255,255,0.5),
-        inset 0 -2px 4px rgba(0,0,0,0.2);
-    }
-
-    #unity-progress-percentage {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #fff;
-      font-size: 14px;
-      font-weight: bold;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
-      z-index: 1;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-
-    /* Mobile */
-    @media (max-width: 768px) {
-      #unity-container { width: 100%; height: 100%; }
-      #unity-logo { width: 220px; margin-bottom: 30px; }
-      #unity-progress-bar-container { width: 90%; }
-      #unity-progress-text { font-size: 14px; }
-    }
-  </style>
-
-  <!-- Google Analytics (keep/remove as you like) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VH396H5BE3"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){ dataLayer.push(arguments); }
-    gtag("js", new Date());
-    gtag("config", "G-VH396H5BE3");
-  </script>
-
-  <!-- PostHog (keep/remove as you like) -->
-  <script>
-    !(function(t,e){
-      var o,n,p,r;
-      e.__SV||(window.posthog&&window.posthog.__loaded)||(
-        (window.posthog=e),
-        (e._i=[]),
-        (e.init=function(i,s,a){
-          function g(t,e){
-            var o=e.split(".");
-            2==o.length&&((t=t[o[0]]),(e=o[1])),
-            (t[e]=function(){ t.push([e].concat(Array.prototype.slice.call(arguments,0))); });
-          }
-          ((p=t.createElement("script")).type="text/javascript"),
-          (p.crossOrigin="anonymous"),
-          (p.async=!0),
-          (p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js"),
-          (r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);
-          var u=e;
-          for(void 0!==a?(u=e[a]=[]):(a="posthog"),
-              u.people=u.people||[],
-              u.toString=function(t){ var e="posthog"; return "posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e; },
-              u.people.toString=function(){ return u.toString(1)+".people (stub)"; },
-              o="init Rr Mr fi Cr Ar ci Tr Fr capture Mi calculateEventProperties Lr register register_once register_for_session unregister unregister_for_session Hr getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Ur jr createPersonProfile zr kr Br opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing Dr debug M Nr getPageViewId captureTraceFeedback captureTraceMetric $r".split(" "),
-              n=0;n<o.length;n++) g(u,o[n]);
-          e._i.push([i,s,a]);
-        }),
-        (e.__SV=1)
-      );
-    })(document, window.posthog || []);
-
-    posthog.init("phc_1N1QmEZbwHZLrjsvULVCD9zjwl06ZRAjuTAdHAnmc8b", {
-      api_host: "https://eu.i.posthog.com",
-      autocapture: true,
-      session_recording: { maskAllInputs: true },
-      capture_pageview: true,
-      capture_pageleave: true,
-    });
-  </script>
-</head>
-
-<body>
-  <div class="background-layer"></div>
-
-  <div id="unity-container">
-    <canvas id="unity-canvas" tabindex="-1"></canvas>
-
-    <!-- Loading Screen -->
-    <div id="unity-loading-bar">
-      <div id="unity-logo"><img src="Logo.png" alt="SIXR Logo"></div>
-
-      <div id="unity-progress-bar-container">
-        <div id="unity-progress-text">Loading...</div>
-
-        <div id="unity-progress-bar-wrapper">
-          <div id="unity-progress-bar-empty"></div>
-          <div id="unity-progress-bar-full"></div>
-          <div id="unity-progress-percentage">0%</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Unity loader script -->
-  <script src="Build/Web.loader.js"></script>
-
-  <script>
-    // Mobile viewport + full-screen canvas
-    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-      var meta = document.createElement('meta');
-      meta.name = 'viewport';
-      meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-      document.head.appendChild(meta);
-
-      var canvas = document.querySelector("#unity-canvas");
-      canvas.style.width = "100%";
-      canvas.style.height = "100%";
-      canvas.style.position = "fixed";
-    }
-
-    // Loading UI refs
-    const loadingBar = document.querySelector("#unity-loading-bar");
-    const progressBarFull = document.querySelector("#unity-progress-bar-full");
-    const progressText = document.querySelector("#unity-progress-text");
-    const progressPercentage = document.querySelector("#unity-progress-percentage");
-
-    function updateProgress(progress) {
-      const percentage = Math.round(progress * 100);
-      progressBarFull.style.width = percentage + "%";
-      progressPercentage.textContent = percentage + "%";
-      progressText.textContent = (percentage < 100) ? "Loading..." : "Starting game...";
-    }
-
-    // Optional: pass URL params into Unity (same behavior as your first file)
-    const urlParams = new URLSearchParams(window.location.search);
-    const userData = {
-      game_id: urlParams.get("game_id"),
-      token: urlParams.get("auth_token"),
-    };
-
-    // IMPORTANT: Build config updated to your second template's version (1.0.7)
-    createUnityInstance(document.querySelector("#unity-canvas"), {
-      arguments: [],
-      dataUrl: "Build/Web.data.unityweb",
-      frameworkUrl: "Build/Web.framework.js.unityweb",
-      codeUrl: "Build/Web.wasm.unityweb",
-      streamingAssetsUrl: "StreamingAssets",
-      companyName: "Sixer Game Ltd",
-      productName: "SixR",
-      productVersion: "1.0.7",
-      // If you're using Brotli-compressed build + correct server headers, keep this:
-      // compressedFormat: "br",
-      // matchWebGLToCanvasSize: false,
-      // devicePixelRatio: 1,
-    }, (progress) => {
-      updateProgress(progress);
-    }).then((unityInstance) => {
-      // Send URL data to Unity if present
-      if (userData.token && userData.game_id) {
-        unityInstance.SendMessage("WebBridge", "GetBridgeUserData", JSON.stringify(userData));
       }
 
-      // Hide loading
-      loadingBar.style.display = "none";
-      window.unityInstance = unityInstance;
-    }).catch((message) => {
-      alert(message);
-    });
-  </script>
-</body>
+      createUnityInstance(document.querySelector("#unity-canvas"), {
+        arguments: [],
+        dataUrl: "Build/Web.data.unityweb",
+        frameworkUrl: "Build/Web.framework.js.unityweb",
+        codeUrl: "Build/Web.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Sixer Game Ltd",
+        productName: "SixR",
+        productVersion: "1.0.7",
+        // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
+        // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
+      }).then((unityInstance) => {
+      }).catch((message) => {
+        alert(message);
+      });
+    </script>
+  </body>
 </html>
