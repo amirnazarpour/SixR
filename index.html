@@ -317,19 +317,7 @@
     }).catch(function(message) {
       // Error handling
       const errorText = message.toString();
-      progressText.textContent = "Failed to load";
-      progressText.style.color = "#ff4444";
-      
-      // Show detailed error
-      errorMessage.textContent = "Error: " + errorText;
-      errorMessage.style.display = "block";
-      
       console.error("Unity load error:", message);
-      
-      // Hide loading bar after error
-      setTimeout(function() {
-        loadingBar.style.opacity = "0.5";
-      }, 1000);
     });
     
     // Handle window resize
