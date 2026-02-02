@@ -4,15 +4,14 @@
   <meta charset="utf-8" />
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>SixR | Sixer Game Ltd</title>
+  
 
-  <meta name="viewport"
-        content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes" />
-
+  <!-- Use default Unity favicon from TemplateData -->
   <link rel="shortcut icon" href="TemplateData/favicon.ico" />
-
+  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
+    
     html, body {
       width: 100%;
       height: 100%;
@@ -20,77 +19,70 @@
       font-family: Arial, sans-serif;
       background: #231F20;
     }
-
+    
     body {
       display: flex;
       justify-content: center;
       align-items: center;
     }
-
-    /* Unity container (desktop size) */
+    
     #unity-container {
       width: 600px;
       height: 960px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       position: relative;
-      background: #231F20;
     }
-
+    
     #unity-canvas {
       width: 100%;
       height: 100%;
-      display: block;
       background: #231F20;
+      display: block;
     }
-
-    /* Loading overlay */
+    
     #unity-loading-bar {
       position: absolute;
-      inset: 0;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-
       background: url('TemplateData/BG.png') no-repeat center center;
       background-size: cover;
-
+      background-color: #231F20;
       z-index: 1000;
     }
-
-    /* Dark overlay */
+    
     #unity-loading-bar::before {
       content: '';
       position: absolute;
-      inset: 0;
-      background: rgba(30, 90, 158, 0.30);
-      z-index: 0;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(30, 90, 158, 0.3);
+      z-index: -1;
     }
-
-    /* Logo */
+    
     #unity-logo {
       width: 280px;
+      height: auto;
       margin-bottom: 50px;
       animation: pulse 2s ease-in-out infinite;
-      z-index: 1;
     }
-
+    
     #unity-logo img {
       width: 100%;
       height: auto;
       display: block;
     }
-
-    /* Progress area */
+    
     #unity-progress-bar-container {
       width: 85%;
       max-width: 400px;
       text-align: center;
-      z-index: 1;
     }
-
+    
     #unity-progress-text {
       color: #FFFFFF;
       font-size: 16px;
@@ -98,7 +90,7 @@
       font-weight: bold;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
     }
-
+    
     #unity-progress-bar-wrapper {
       position: relative;
       width: 100%;
@@ -107,26 +99,28 @@
       overflow: hidden;
       box-shadow: 0 4px 8px rgba(0,0,0,0.5);
     }
-
+    
     #unity-progress-bar-empty {
       position: absolute;
-      inset: 0;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
       background: linear-gradient(180deg, #e8e8e8 0%, #d0d0d0 50%, #c0c0c0 100%);
       border-radius: 16px;
     }
-
+    
     #unity-progress-bar-full {
       position: absolute;
-      inset: 0;
+      top: 0; left: 0;
       width: 0%;
       height: 100%;
-      transition: width 0.25s ease-out;
+      transition: width 0.3s ease-out;
       border-radius: 16px;
       background: linear-gradient(180deg, #ffd700 0%, #f5c842 50%, #daa520 100%);
       box-shadow: inset 0 2px 4px rgba(255,255,255,0.5),
                   inset 0 -2px 4px rgba(0,0,0,0.2);
     }
-
+    
     #unity-progress-percentage {
       position: absolute;
       top: 50%;
@@ -138,35 +132,52 @@
       text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
       z-index: 1;
     }
-
+    
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.7; }
     }
-
-    /* Mobile fullscreen */
-    body.mobile { display: block; }
-    body.mobile #unity-container { width: 100%; height: 100%; }
-    body.mobile #unity-canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
-
+    
+    /* Mobile Styles */
     @media (max-width: 768px) {
+      #unity-container { 
+        width: 100% !important; 
+        height: 100% !important; 
+      }
       #unity-logo { width: 220px; margin-bottom: 30px; }
       #unity-progress-bar-container { width: 90%; }
       #unity-progress-text { font-size: 14px; }
+    }
+    
+    /* Error message styling */
+    .error-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ff4444;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 10px;
+      display: none;
     }
   </style>
 </head>
 
 <body>
   <div id="unity-container">
-    <canvas id="unity-canvas" tabindex="-1"></canvas>
-
+    <canvas id="unity-canvas" width=600 height=960 tabindex="-1"></canvas>
+    
+    <!-- Loading Screen -->
     <div id="unity-loading-bar">
-      <div id="unity-logo"><img src="TemplateData/Logo.png" alt="SIXR Logo"></div>
-
+      <div id="unity-logo">
+        <img src="TemplateData\Logo.png" alt="SixR Logo">
+      </div>
       <div id="unity-progress-bar-container">
         <div id="unity-progress-text">Loading...</div>
-
         <div id="unity-progress-bar-wrapper">
           <div id="unity-progress-bar-empty"></div>
           <div id="unity-progress-bar-full"></div>
@@ -174,58 +185,165 @@
         </div>
       </div>
     </div>
+    
+    <!-- Error message (hidden by default) -->
+    <div id="unity-error-message" class="error-message"></div>
   </div>
 
-  <!-- Unity fills this in with the correct generated loader path -->
-  <script src=""></script>
 
+  <script src="Build/Loading Build.loader.js"></script>
   <script>
-    // Mobile class (layout becomes fullscreen)
-    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-      document.body.classList.add("mobile");
-    }
+    // Mobile detection and setup
+    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // Mobile viewport setup
+      var meta = document.createElement('meta');
+      meta.name = 'viewport';
+      meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+      document.getElementsByTagName('head')[0].appendChild(meta);
+      
+      var canvas = document.querySelector("#unity-canvas");
+      var container = document.querySelector("#unity-container");
+      
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+      canvas.style.position = "fixed";
+      container.style.width = "100%";
+      container.style.height = "100%";
 
-    const canvas = document.querySelector("#unity-canvas");
+    }
+    
+    // Loading bar elements
     const loadingBar = document.querySelector("#unity-loading-bar");
     const progressBarFull = document.querySelector("#unity-progress-bar-full");
     const progressText = document.querySelector("#unity-progress-text");
     const progressPercentage = document.querySelector("#unity-progress-percentage");
-
+    const errorMessage = document.querySelector("#unity-error-message");
+    
+    // Handle missing images
+    function handleImageError(img, fallbackText) {
+      img.style.display = 'none';
+      const parent = img.parentElement;
+      if (parent.id === 'unity-logo') {
+        parent.innerHTML = '<div style="color: white; font-size: 24px; font-weight: bold;">SixR</div>';
+      }
+    }
+    
+    // Preload images to check if they exist
+    function preloadImages() {
+      const logoImg = document.querySelector('#unity-logo img');
+      if (logoImg) {
+        logoImg.onerror = function() {
+          handleImageError(this, 'SixR');
+        };
+      }
+    }
+    
+    // Progress update function
     function updateProgress(progress) {
       const percentage = Math.round(progress * 100);
-      progressBarFull.style.width = percentage + "%";
-      progressPercentage.textContent = percentage + "%";
-      progressText.textContent = (percentage < 100) ? "Loading..." : "Starting game...";
+      progressBarFull.style.width = percentage + '%';
+      progressPercentage.textContent = percentage + '%';
+      
+      if (percentage < 100) {
+        progressText.textContent = 'Loading...';
+      } else {
+        progressText.textContent = 'Starting game...';
+      }
     }
-
-    // Optional query param bridge
+    
+    // Get query parameters for bridge data
     const urlParams = new URLSearchParams(window.location.search);
     const userData = {
-      game_id: urlParams.get("game_id"),
-      token: urlParams.get("auth_token")
+      game_id: urlParams.get("game_id") || urlParams.get("gameId"),
+      token: urlParams.get("auth_token") || urlParams.get("token"),
+      user_id: urlParams.get("user_id"),
+      platform: urlParams.get("platform")
     };
-
-    createUnityInstance(canvas, {
-      dataUrl: "",
-      frameworkUrl: "",
-      codeUrl: "",
+    
+    // Create Unity instance with progress callback
+    createUnityInstance(document.querySelector("#unity-canvas"), {
+      dataUrl: "Build/Loading Build.data.unityweb",
+      frameworkUrl: "Build/Loading Build.framework.js.unityweb",
+      codeUrl: "Build/Loading Build.wasm.unityweb",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "Sixer Game Ltd",
       productName: "SixR",
       productVersion: "1.0.7",
-    }, (progress) => {
+      // matchWebGLToCanvasSize: false,
+      // devicePixelRatio: 1,
+    }, function(progress) {
       updateProgress(progress);
-    }).then((unityInstance) => {
-
+    }).then(function(unityInstance) {
+      
+      // Send bridge data to Unity if available
       if (userData.token && userData.game_id) {
-        unityInstance.SendMessage("WebBridge", "GetBridgeUserData", JSON.stringify(userData));
+        try {
+          unityInstance.SendMessage("WebBridge", "GetBridgeUserData", JSON.stringify(userData));
+        } catch(e) {
+          console.log("Bridge not ready, will retry...");
+          setTimeout(function() {
+            try {
+              unityInstance.SendMessage("WebBridge", "GetBridgeUserData", JSON.stringify(userData));
+            } catch(e2) {
+              console.log("Could not send bridge data");
+            }
+          }, 1000);
+        }
       }
-
-      loadingBar.style.display = "none";
+      
+      // Hide loading bar with fade effect
+      setTimeout(function() {
+        loadingBar.style.transition = "opacity 0.5s ease";
+        loadingBar.style.opacity = "0";
+        setTimeout(function() {
+          loadingBar.style.display = "none";
+        }, 500);
+      }, 500);
+      
+      
+      // Expose instance globally
       window.unityInstance = unityInstance;
-
-    }).catch((message) => {
-      alert(message);
+      
+      // Handle fullscreen on mobile if needed
+      if (isMobile) {
+        // Optional: Add fullscreen button or auto-enter fullscreen
+        // document.addEventListener('click', function() {
+        //   canvas.requestFullscreen();
+        // }, { once: true });
+      }
+      
+    }).catch(function(message) {
+      // Error handling
+      const errorText = message.toString();
+      progressText.textContent = "Failed to load";
+      progressText.style.color = "#ff4444";
+      
+      // Show detailed error
+      errorMessage.textContent = "Error: " + errorText;
+      errorMessage.style.display = "block";
+      
+      console.error("Unity load error:", message);
+      
+      // Hide loading bar after error
+      setTimeout(function() {
+        loadingBar.style.opacity = "0.5";
+      }, 1000);
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      if (isMobile) {
+        var canvas = document.querySelector("#unity-canvas");
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+      }
+    });
+    
+    // Preload images after DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      preloadImages();
     });
   </script>
 </body>
