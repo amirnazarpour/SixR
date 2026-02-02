@@ -1,45 +1,232 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | SixR</title>
-  </head>
-  <body style="text-align: center; padding: 0; border: 0; margin: 0;">
-    <canvas id="unity-canvas" width=600 height=960 tabindex="-1" style="width: 600px; height: 960px; background: #231F20"></canvas>
-    <script src="Build/Web.loader.js"></script>
-    <script>
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>SixR | Sixer Game Ltd</title>
 
-        var canvas = document.querySelector("#unity-canvas");
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        canvas.style.position = "fixed";
+  <meta name="viewport"
+        content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes" />
 
-        document.body.style.textAlign = "left";
+  <link rel="shortcut icon" href="TemplateData/favicon.ico" />
 
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: #231F20;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Unity container (desktop size) */
+    #unity-container {
+      width: 600px;
+      height: 960px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      background: #231F20;
+    }
+
+    #unity-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #231F20;
+    }
+
+    /* Loading overlay */
+    #unity-loading-bar {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      background: url('TemplateData/BG.png') no-repeat center center;
+      background-size: cover;
+
+      z-index: 1000;
+    }
+
+    /* Dark overlay */
+    #unity-loading-bar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(30, 90, 158, 0.30);
+      z-index: 0;
+    }
+
+    /* Logo */
+    #unity-logo {
+      width: 280px;
+      margin-bottom: 50px;
+      animation: pulse 2s ease-in-out infinite;
+      z-index: 1;
+    }
+
+    #unity-logo img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Progress area */
+    #unity-progress-bar-container {
+      width: 85%;
+      max-width: 400px;
+      text-align: center;
+      z-index: 1;
+    }
+
+    #unity-progress-text {
+      color: #FFFFFF;
+      font-size: 16px;
+      margin-bottom: 15px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    }
+
+    #unity-progress-bar-wrapper {
+      position: relative;
+      width: 100%;
+      height: 32px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    }
+
+    #unity-progress-bar-empty {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, #e8e8e8 0%, #d0d0d0 50%, #c0c0c0 100%);
+      border-radius: 16px;
+    }
+
+    #unity-progress-bar-full {
+      position: absolute;
+      inset: 0;
+      width: 0%;
+      height: 100%;
+      transition: width 0.25s ease-out;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffd700 0%, #f5c842 50%, #daa520 100%);
+      box-shadow: inset 0 2px 4px rgba(255,255,255,0.5),
+                  inset 0 -2px 4px rgba(0,0,0,0.2);
+    }
+
+    #unity-progress-percentage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+      z-index: 1;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Mobile fullscreen */
+    body.mobile { display: block; }
+    body.mobile #unity-container { width: 100%; height: 100%; }
+    body.mobile #unity-canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
+
+    @media (max-width: 768px) {
+      #unity-logo { width: 220px; margin-bottom: 30px; }
+      #unity-progress-bar-container { width: 90%; }
+      #unity-progress-text { font-size: 14px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="unity-container">
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+
+    <div id="unity-loading-bar">
+      <div id="unity-logo"><img src="TemplateData/Logo.png" alt="SIXR Logo"></div>
+
+      <div id="unity-progress-bar-container">
+        <div id="unity-progress-text">Loading...</div>
+
+        <div id="unity-progress-bar-wrapper">
+          <div id="unity-progress-bar-empty"></div>
+          <div id="unity-progress-bar-full"></div>
+          <div id="unity-progress-percentage">0%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unity fills this in with the correct generated loader path -->
+  <script src=""></script>
+
+  <script>
+    // Mobile class (layout becomes fullscreen)
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      document.body.classList.add("mobile");
+    }
+
+    const canvas = document.querySelector("#unity-canvas");
+    const loadingBar = document.querySelector("#unity-loading-bar");
+    const progressBarFull = document.querySelector("#unity-progress-bar-full");
+    const progressText = document.querySelector("#unity-progress-text");
+    const progressPercentage = document.querySelector("#unity-progress-percentage");
+
+    function updateProgress(progress) {
+      const percentage = Math.round(progress * 100);
+      progressBarFull.style.width = percentage + "%";
+      progressPercentage.textContent = percentage + "%";
+      progressText.textContent = (percentage < 100) ? "Loading..." : "Starting game...";
+    }
+
+    // Optional query param bridge
+    const urlParams = new URLSearchParams(window.location.search);
+    const userData = {
+      game_id: urlParams.get("game_id"),
+      token: urlParams.get("auth_token")
+    };
+
+    createUnityInstance(canvas, {
+      dataUrl: "",
+      frameworkUrl: "",
+      codeUrl: "",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Sixer Game Ltd",
+      productName: "SixR",
+      productVersion: "1.0.7",
+    }, (progress) => {
+      updateProgress(progress);
+    }).then((unityInstance) => {
+
+      if (userData.token && userData.game_id) {
+        unityInstance.SendMessage("WebBridge", "GetBridgeUserData", JSON.stringify(userData));
       }
 
-      createUnityInstance(document.querySelector("#unity-canvas"), {
-        arguments: [],
-        dataUrl: "Build/Web.data.unityweb",
-        frameworkUrl: "Build/Web.framework.js.unityweb",
-        codeUrl: "Build/Web.wasm.unityweb",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "Sixer Game Ltd",
-        productName: "SixR",
-        productVersion: "1.0.7",
-        // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
-        // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
-      }).then((unityInstance) => {
-      }).catch((message) => {
-        alert(message);
-      });
-    </script>
-  </body>
+      loadingBar.style.display = "none";
+      window.unityInstance = unityInstance;
+
+    }).catch((message) => {
+      alert(message);
+    });
+  </script>
+</body>
 </html>
