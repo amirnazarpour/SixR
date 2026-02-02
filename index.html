@@ -263,29 +263,63 @@
     };
     
     // Create Unity instance with progress callback
-   createUnityInstance(document.querySelector("#unity-canvas"), {
-        dataUrl: "Build/Web.data.unityweb",
-        frameworkUrl: "Build/Web.framework.js.unityweb",
-        codeUrl: "Build/Web.wasm.unityweb",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "Sixer Game Ltd",
-        productName: "SixR",
-        productVersion: "1.0.7",
-        compressedFormat: "br",
-      }, (progress) => {
-        updateProgress(progress);
-      })
-      .then((unityInstance) => {
-        if (userData.token && userData.game_id) {
+    createUnityInstance(document.querySelector("#unity-canvas"), {
+      dataUrl: "Build/Loading Build.data.unityweb",
+      frameworkUrl: "Build/Loading Build.framework.js.unityweb",
+      codeUrl: "Build/Loading Build.wasm.unityweb",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Sixer Game Ltd",
+      productName: "SixR",
+      productVersion: "1.0.7",
+      compressedFormat: "br",
+      // matchWebGLToCanvasSize: false,
+      // devicePixelRatio: 1,
+    }, function(progress) {
+      updateProgress(progress);
+    }).then(function(unityInstance) {
+      console.log("theneeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+      // Send bridge data to Unity if available
+      if (userData.token && userData.game_id) {
+        try {
           unityInstance.SendMessage("WebBridge", "GetBridgeUserData", JSON.stringify(userData));
+        } catch(e) {
+          console.log("Bridge not ready, will retry...");
+          setTimeout(function() {
+            try {
+              unityInstance.SendMessage("WebBridge", "GetBridgeUserData", JSON.stringify(userData));
+            } catch(e2) {
+              console.log("Could not send bridge data");
+            }
+          }, 1000);
         }
-
-        loadingBar.style.display = "none";
-        window.unityInstance = unityInstance;
-      })
-      .catch((message) => {
-        alert(message);
-      });
+      }
+      
+      // Hide loading bar with fade effect
+      setTimeout(function() {
+        loadingBar.style.transition = "opacity 0.5s ease";
+        loadingBar.style.opacity = "0";
+        setTimeout(function() {
+          loadingBar.style.display = "none";
+        }, 500);
+      }, 500);
+      
+      
+      // Expose instance globally
+      window.unityInstance = unityInstance;
+      
+      // Handle fullscreen on mobile if needed
+      if (isMobile) {
+        // Optional: Add fullscreen button or auto-enter fullscreen
+        // document.addEventListener('click', function() {
+        //   canvas.requestFullscreen();
+        // }, { once: true });
+      }
+      
+    }).catch(function(message) {
+      // Error handling
+      const errorText = message.toString();
+      console.log("Unity load errorrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr:", message);
+    });
     
     // Handle window resize
     window.addEventListener('resize', function() {
