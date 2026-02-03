@@ -4,10 +4,13 @@
   <meta charset="utf-8" />
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>SixR | Sixer Game Ltd</title>
+
   <meta property="og:site_name" content="SixR">
   <meta property="og:title" content="Play SixR Game">
 
 
+  <!-- Use default Unity favicon from TemplateData -->
+  <link rel="shortcut icon" href="TemplateData/favicon.ico" />
   
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -191,7 +194,7 @@
   </div>
 
 
-  <script src="Build/Loading Build.loader.js"></script>
+  <script src="Build/SixR_0.0.1.loader.js"></script>
   <script>
     // Mobile detection and setup
     var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -264,20 +267,19 @@
     
     // Create Unity instance with progress callback
     createUnityInstance(document.querySelector("#unity-canvas"), {
-      dataUrl: "Build/Loading Build.data.unityweb",
-      frameworkUrl: "Build/Loading Build.framework.js.unityweb",
-      codeUrl: "Build/Loading Build.wasm.unityweb",
+      dataUrl: "Build/SixR_0.0.1.data.unityweb",
+      frameworkUrl: "Build/SixR_0.0.1.framework.js.unityweb",
+      codeUrl: "Build/SixR_0.0.1.wasm.unityweb",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "Sixer Game Ltd",
       productName: "SixR",
-      productVersion: "1.0.7",
-      compressedFormat: "br",
+      productVersion: "0.0.1",
       // matchWebGLToCanvasSize: false,
       // devicePixelRatio: 1,
     }, function(progress) {
       updateProgress(progress);
     }).then(function(unityInstance) {
-      console.log("theneeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+      
       // Send bridge data to Unity if available
       if (userData.token && userData.game_id) {
         try {
@@ -318,7 +320,7 @@
     }).catch(function(message) {
       // Error handling
       const errorText = message.toString();
-      console.log("Unity load errorrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr:", message);
+      console.error("Unity load error:", message);
     });
     
     // Handle window resize
